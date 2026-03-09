@@ -21,8 +21,8 @@ import com.dlucci.textbcc.Screen
 fun ImportScreen(navController: NavController) {
 
     val contactPermissionLauncher =
-        rememberLauncherForActivityResult(contract = ActivityResultContracts.RequestPermission()) { granted ->
-            if (granted) {
+        rememberLauncherForActivityResult(contract = ActivityResultContracts.RequestMultiplePermissions()) {
+            if (!it.containsValue(false)) {
                 navController.navigate(Screen.ContactScreen.route)
             }
         }
@@ -35,7 +35,7 @@ fun ImportScreen(navController: NavController) {
         ) {
 
             ImportContactButton(onClick = {
-                contactPermissionLauncher.launch(Manifest.permission.READ_CONTACTS)
+                contactPermissionLauncher.launch(arrayOf(Manifest.permission.READ_CONTACTS, Manifest.permission.SEND_SMS))
             })
         }
     }

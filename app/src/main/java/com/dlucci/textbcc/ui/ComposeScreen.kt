@@ -2,17 +2,27 @@ package com.dlucci.textbcc.ui
 
 import android.app.PendingIntent
 import android.content.Intent
+import android.inputmethodservice.Keyboard
 import android.telephony.SmsManager
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -20,7 +30,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
+import com.dlucci.textbcc.Screen
 import com.dlucci.textbcc.TextBccDeliveredBroadcastReceiver
 import com.dlucci.textbcc.TextBccSentBroadcastReceiver
 import com.dlucci.textbcc.viewmodel.TextBccViewModel
@@ -31,6 +44,7 @@ fun ComposeScreen(navController: NavController, viewModel: TextBccViewModel = ko
     val context = LocalContext.current
 
     var text by remember { mutableStateOf("") }
+    var clicked by remember { mutableStateOf(false) }
     Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
         Column {
             LazyRow {
@@ -46,37 +60,59 @@ fun ComposeScreen(navController: NavController, viewModel: TextBccViewModel = ko
                     text = it
                 }
             )
-            SaveButton(text, onClick = {
-                val sendingIntent = Intent(context, TextBccSentBroadcastReceiver::class.java)
-                val deliveredIntent = Intent(context, TextBccDeliveredBroadcastReceiver::class.java)
-                val smsManager = context.getSystemService(SmsManager::class.java)
-                viewModel.selectedUsers.value.forEach {
-                    smsManager.sendTextMessage(
-                        it.phoneNumber, /*Delivery Address*/
-                        null, /*scAddress*/
-                        text, /*text*/
-                        PendingIntent.getBroadcast( /*sent Intent*/
-                            context,
-                            42,
-                            sendingIntent,
-                            PendingIntent.FLAG_MUTABLE
-                        ),
-                        PendingIntent.getBroadcast( /*delivery Intent*/
-                            context,
-                            42,
-                            deliveredIntent,
-                            PendingIntent.FLAG_MUTABLE
-                        ),
-                    )
-                }
+            Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                SendButton(text, onClick = {
+                    viewModel.sendMessage(message = text, context = context)
+                    navController.navigate(Screen.ImportScreen.route) {
+                        popUpTo(Screen.ImportScreen.route) {
+                            inclusive = false
+                        }
+                    }
+                })
+                SaveButton { clicked = true }
+            }
+        }
+    }
+
+    if (clicked) {
+        SaveGroupNameDialog(onConfirm = { groupName -> viewModel.saveGroup(groupName) })
+    }
+
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SaveGroupNameDialog(onConfirm: (String) -> Unit) {
+    var text by remember { mutableStateOf("") }
+    BasicAlertDialog(onDismissRequest = {},
+        properties = DialogProperties(windowTitle = "Save Group?")
+    ) {
+        Column {
+            TextField(value = text, modifier = Modifier.padding(horizontal = 15.dp).height(300.dp), onValueChange = {
+                text = it
             })
+            Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                TextButton(onClick = { onConfirm(text) }, enabled = text.isNotEmpty()) {
+                    Text(text = "Save")
+                }
+                TextButton(onClick = { /*Dismiss dialog*/ }) {
+                    Text(text = "Dismiss")
+                }
+            }
         }
     }
 }
 
 @Composable
-fun SaveButton(text: String, onClick: () -> Unit) {
+fun SendButton(text: String, onClick: () -> Unit) {
     Button(enabled = text.isNotEmpty(), onClick = { onClick() }) {
         Text("Send")
+    }
+}
+
+@Composable
+fun SaveButton(onClick: () -> Unit) {
+    Button(enabled = true, onClick = { onClick() }) {
+        Text("Save Group")
     }
 }

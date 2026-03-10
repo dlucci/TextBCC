@@ -30,8 +30,12 @@ fun TextBccNavHost() {
 
     NavHost(navController = navController, startDestination = route_name) {
         navigation(startDestination = Screen.ImportScreen.route, route = route_name){
-            composable(route = Screen.ImportScreen.route) {
-                ImportScreen(navController)
+            composable(route = Screen.ImportScreen.route) { backStackEntry ->
+                val parentEntry = remember(backStackEntry) {
+                    navController.getBackStackEntry(route_name)
+                }
+                val viewModel = koinViewModel<TextBccViewModel>(viewModelStoreOwner = parentEntry)
+                ImportScreen(navController, viewModel)
             }
             composable(route = Screen.ContactScreen.route) { backStackEntry ->
                 val parentEntry = remember(backStackEntry) {

@@ -3,6 +3,8 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     kotlin("plugin.serialization") version "2.0.21"
+    alias(libs.plugins.ksp)
+    id("androidx.room") version "2.8.4" apply(false)
 }
 
 android {
@@ -38,6 +40,7 @@ android {
     buildFeatures {
         compose = true
     }
+
 }
 
 dependencies {
@@ -54,6 +57,10 @@ dependencies {
     implementation(libs.koin)
     implementation(libs.koin.compose)
     implementation(libs.kotlinx.serialization)
+    implementation(libs.room.runtime)
+    implementation(libs.room.ktx)
+    implementation(libs.material.icons)
+    ksp(libs.room.compiler)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

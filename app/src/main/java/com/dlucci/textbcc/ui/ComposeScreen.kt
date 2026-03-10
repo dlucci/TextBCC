@@ -1,9 +1,5 @@
 package com.dlucci.textbcc.ui
 
-import android.app.PendingIntent
-import android.content.Intent
-import android.inputmethodservice.Keyboard
-import android.telephony.SmsManager
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,7 +9,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -22,7 +17,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,8 +28,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
 import com.dlucci.textbcc.Screen
-import com.dlucci.textbcc.TextBccDeliveredBroadcastReceiver
-import com.dlucci.textbcc.TextBccSentBroadcastReceiver
 import com.dlucci.textbcc.viewmodel.TextBccViewModel
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -75,16 +67,16 @@ fun ComposeScreen(navController: NavController, viewModel: TextBccViewModel = ko
     }
 
     if (clicked) {
-        SaveGroupNameDialog(onConfirm = { groupName -> viewModel.saveGroup(groupName) })
+        SaveGroupNameDialog(onConfirm = { groupName -> viewModel.saveGroup(groupName) }, onDismiss = { clicked = false })
     }
 
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SaveGroupNameDialog(onConfirm: (String) -> Unit) {
+fun SaveGroupNameDialog(onConfirm: (String) -> Unit, onDismiss: () -> Unit) {
     var text by remember { mutableStateOf("") }
-    BasicAlertDialog(onDismissRequest = {},
+    BasicAlertDialog(onDismissRequest = {onDismiss()},
         properties = DialogProperties(windowTitle = "Save Group?")
     ) {
         Column {
@@ -95,7 +87,7 @@ fun SaveGroupNameDialog(onConfirm: (String) -> Unit) {
                 TextButton(onClick = { onConfirm(text) }, enabled = text.isNotEmpty()) {
                     Text(text = "Save")
                 }
-                TextButton(onClick = { /*Dismiss dialog*/ }) {
+                TextButton(onClick = { onDismiss() }) {
                     Text(text = "Dismiss")
                 }
             }

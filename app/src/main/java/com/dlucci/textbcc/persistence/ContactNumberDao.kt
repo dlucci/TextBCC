@@ -17,5 +17,5 @@ interface ContactNumberDao {
     fun insert(group : ContactGroupEntity)
 
     @Delete
-    fun delete(group: ContactGroupEntity)
+    fun delete(group : ContactGroupEntity)
 }

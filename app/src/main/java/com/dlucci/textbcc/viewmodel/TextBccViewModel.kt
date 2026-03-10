@@ -108,4 +108,12 @@ class TextBccViewModel : ViewModel() {
 
     }
 
+    fun delete(group: ContactGroupEntity) {
+        val dao = database.contactDao()
+        viewModelScope.launch(Dispatchers.IO) {
+            dao.delete(group)
+            getAllContacts()
+        }
+    }
+
 }

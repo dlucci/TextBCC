@@ -67,7 +67,10 @@ fun ComposeScreen(navController: NavController, viewModel: TextBccViewModel = ko
     }
 
     if (clicked) {
-        SaveGroupNameDialog(onConfirm = { groupName -> viewModel.saveGroup(groupName) }, onDismiss = { clicked = false })
+        SaveGroupNameDialog(onConfirm = { groupName ->
+            clicked = false
+            viewModel.saveGroup(groupName)
+        }, onDismiss = { clicked = false })
     }
 
 }
@@ -76,13 +79,19 @@ fun ComposeScreen(navController: NavController, viewModel: TextBccViewModel = ko
 @Composable
 fun SaveGroupNameDialog(onConfirm: (String) -> Unit, onDismiss: () -> Unit) {
     var text by remember { mutableStateOf("") }
-    BasicAlertDialog(onDismissRequest = {onDismiss()},
+    BasicAlertDialog(
+        onDismissRequest = { onDismiss() },
         properties = DialogProperties(windowTitle = "Save Group?")
     ) {
         Column {
-            TextField(value = text, modifier = Modifier.padding(horizontal = 15.dp).height(300.dp), onValueChange = {
-                text = it
-            })
+            TextField(
+                value = text,
+                modifier = Modifier
+                    .padding(horizontal = 15.dp)
+                    .height(300.dp),
+                onValueChange = {
+                    text = it
+                })
             Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
                 TextButton(onClick = { onConfirm(text) }, enabled = text.isNotEmpty()) {
                     Text(text = "Save")

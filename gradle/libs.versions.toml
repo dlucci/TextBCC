@@ -1,4 +1,5 @@
 [versions]
+kspVersion = "2.0.21-1.0.25"
 agp = "8.10.0"
 kotlin = "2.0.21"
 coreKtx = "1.16.0"
@@ -11,6 +12,8 @@ composeBom = "2024.09.00"
 naigationCompose = "2.8.0"
 koinVersion = "4.1.1"
 kotlinxSerialization = "1.5.0"
+room = "2.8.4"
+iconMaterial = "1.6.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -31,9 +34,13 @@ androidx-navigation = {group = "androidx.navigation", name = "navigation-compose
 koin = {group = "io.insert-koin", name = "koin-android", version.ref = "koinVersion" }
 koin-compose = {group = "io.insert-koin", name = "koin-androidx-compose", version.ref = "koinVersion"}
 kotlinx-serialization = {group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerialization"}
+room-runtime = {group = "androidx.room", name = "room-runtime", version.ref = "room"}
+room-compiler = {group = "androidx.room", name = "room-compiler", version.ref = "room"}
+room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room"}
+material-icons = { group = "androidx.compose.material", name = "material-icons-extended", version.ref = "iconMaterial"}
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
-
+ksp = {id = "com.google.devtools.ksp", version.ref = "kspVersion"}

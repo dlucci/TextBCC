@@ -3,6 +3,7 @@ package com.dlucci.textbcc.viewmodel
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.os.Handler
 import android.provider.ContactsContract
 import android.telephony.SmsManager
 import androidx.lifecycle.ViewModel
@@ -20,15 +21,15 @@ import org.koin.java.KoinJavaComponent.inject
 
 
 class TextBccViewModel : ViewModel() {
-    private val database : ContactNumberDatabase by inject(ContactNumberDatabase::class.java)
+    private val database: ContactNumberDatabase by inject(ContactNumberDatabase::class.java)
 
     private val _selectedUsers = MutableStateFlow<List<ContactNumber>>(emptyList())
     val selectedUsers = _selectedUsers.asStateFlow()
 
     private val _contacts = MutableStateFlow<List<ContactGroupEntity>>(emptyList())
-    val  contacts = _contacts.asStateFlow()
+    val contacts = _contacts.asStateFlow()
 
-    fun updateSelectedUsers(users : List<ContactNumber>) {
+    fun updateSelectedUsers(users: List<ContactNumber>) {
         _selectedUsers.value = users
     }
 
@@ -66,32 +67,36 @@ class TextBccViewModel : ViewModel() {
     }
 
 
-    fun sendMessage(message : String, context: Context) {
+    fun sendMessage(message: String, context: Context) {
         val sendingIntent = Intent(context, TextBccSentBroadcastReceiver::class.java)
         val deliveredIntent = Intent(context, TextBccDeliveredBroadcastReceiver::class.java)
         val smsManager = context.getSystemService(SmsManager::class.java)
-        selectedUsers.value.forEach {
-            smsManager.sendTextMessage(
-                it.phoneNumber, /*Delivery Address*/
-                null, /*scAddress*/
-                message, /*text*/
-                PendingIntent.getBroadcast( /*sent Intent*/
-                    context,
-                    42,
-                    sendingIntent,
-                    PendingIntent.FLAG_MUTABLE
-                ),
-                PendingIntent.getBroadcast( /*delivery Intent*/
-                    context,
-                    42,
-                    deliveredIntent,
-                    PendingIntent.FLAG_MUTABLE
-                ),
+        selectedUsers.value.forEachIndexed { index, user ->
+            Handler().postDelayed(
+                {
+                    smsManager.sendTextMessage(
+                        user.phoneNumber, /*Delivery Address*/
+                        null, /*scAddress*/
+                        message, /*text*/
+                        PendingIntent.getBroadcast( /*sent Intent*/
+                            context,
+                            index,
+                            sendingIntent,
+                            PendingIntent.FLAG_MUTABLE
+                        ),
+                        PendingIntent.getBroadcast( /*delivery Intent*/
+                            context,
+                            index,
+                            deliveredIntent,
+                            PendingIntent.FLAG_MUTABLE
+                        ),
+                    )
+                }, 150L
             )
         }
     }
 
-    fun saveGroup(name : String) {
+    fun saveGroup(name: String) {
         val dao = database.contactDao()
         viewModelScope.launch(Dispatchers.IO) {
             dao.insert(ContactGroupEntity(groupName = name, contacts = selectedUsers.value))
@@ -102,7 +107,7 @@ class TextBccViewModel : ViewModel() {
     fun getAllContacts() {
         val dao = database.contactDao()
         viewModelScope.launch(Dispatchers.IO) {
-             _contacts.value = dao.getAllGroups()
+            _contacts.value = dao.getAllGroups()
         }
 
 
